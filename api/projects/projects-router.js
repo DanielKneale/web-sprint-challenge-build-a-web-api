@@ -27,39 +27,48 @@ router.get('/:id',validateProject, (req,res) =>{
     .then(project => {
         res.status(200).json(project)
     })
-    .catch(e =>{
-        res.status(500).json({message: 'error getting project'})
+    .catch(e => {
+        res.status(500).json({message:"server error"})
     })
 }) 
 
-router.post('/',checkReq, (req,res)=>{
-    const newPro = req.body
-    Project.insert(newPro)
+router.post('/',checkReq, async (req,res)=>{
+    Project.insert(req.body)
     .then(project => {
         res.status(201).json(project)
     })
-    .catch(e => {
-        res.status(500).json({message: "server side error"})
-    })
+    
 })
 
 router.put('/:id',validateProject,checkReq,trueOrFlase, async (req,res)=>{
     try{
-        const data = await Project.update(req.params.id, req.body) 
-        res.status(200).json(data)
+        await Project.update(req.params.id, req.body) 
+        const updatedProj = await Project.get(req.params.id)
+        res.status(200).json(updatedProj)
     } catch(e) {
         res.status(500).json({message: "server error"})
     }
 })
 
 
-router.delete('/api/projects/:id',validateProject, async (req,res)=>{
+router.delete('/:id',validateProject, async (req,res)=>{
     try{
-        const data = await Project.remove(req.params.id) 
-        res.status(200).json(data)
+        const delProject = await Project.get(req.params.id)
+        await Project.remove(req.params.id) 
+        res.status(200).json(delProject)
     } catch(e) {
-        res.status(500).json(e,{message: "server error"})
+        res.status(500).json({message: "server error"})
     }
+})
+
+router.get('/:id/actions/',(req,res)=>{
+    Project.getProjectActions(req.params.id)
+    .then(action => {
+        res.status(200).json(action)
+    })
+    .catch(e => {
+        res.status(500).json({message:"server error"})
+    })
 })
 
 
